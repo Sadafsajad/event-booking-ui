@@ -1,0 +1,4 @@
+<!-- public/laravel-logo.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 257" width="64" height="64">
+  <path fill="#FF2D20" d="M0 0v256h256V0H0zm128 230.4L38.4 192v-76.8L128 153.6V230.4zM38.4 76.8L128 115.2v38.4L38.4 115.2V76.8zm179.2 38.4v76.8l-89.6 38.4v-76.8l89.6-38.4zm0-38.4l-89.6 38.4V76.8L217.6 38.4v38.4z"></path>
+</svg>
