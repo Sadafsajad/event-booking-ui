@@ -12,7 +12,7 @@ import { RouterView, RouterLink } from 'vue-router'
 
       <nav class="nav-right">
         <RouterLink to="/" class="nav-link" active-class="active">Home</RouterLink>
-        <RouterLink to="/about" class="nav-link" active-class="active">About</RouterLink>
+        <!-- <RouterLink to="/about" class="nav-link" active-class="active">About</RouterLink> -->
       </nav>
     </header>
 

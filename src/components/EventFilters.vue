@@ -1,5 +1,6 @@
 <template>
-  <form @submit.prevent="$emit('filter')" class="filters">
+  <form class="filters">
+    <!-- Search -->
     <v-text-field
       v-model="localFilters.q"
       label="Search"
@@ -25,6 +26,8 @@
           v-bind="props"
           variant="outlined"
           hide-details
+          clearable
+          @click:clear="localFilters.from = null"
         />
       </template>
       <v-date-picker
@@ -49,6 +52,8 @@
           v-bind="props"
           variant="outlined"
           hide-details
+          clearable
+          @click:clear="localFilters.to = null"
         />
       </template>
       <v-date-picker
@@ -56,15 +61,6 @@
         @update:model-value="menuTo = false"
       />
     </v-menu>
-
-    <v-btn
-      class="text-none text-subtitle-1"
-      size="large"
-      variant="tonal"
-      type="submit"
-    >
-      Filter
-    </v-btn>
   </form>
 </template>
 
@@ -72,7 +68,7 @@
 import { reactive, ref, watch } from "vue";
 
 const props = defineProps(["modelValue"]);
-const emit = defineEmits(["update:modelValue", "filter"]);
+const emit = defineEmits(["update:modelValue"]);
 
 const localFilters = reactive({ ...props.modelValue });
 const menuFrom = ref(false);
@@ -84,7 +80,7 @@ watch(localFilters, (newVal) => emit("update:modelValue", newVal), { deep: true 
 <style scoped>
 .filters {
   display: grid;
-  grid-template-columns: 1fr 170px 170px 120px;
+  grid-template-columns: 1fr 170px 170px;
   gap: 8px;
   margin-bottom: 12px;
 }

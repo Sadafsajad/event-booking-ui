@@ -50,6 +50,8 @@
             size="small"
             variant="flat"
             class="text-white"
+            :loading="item.isBooking"    
+            :disabled="item.isBooking"   
             @click="emitBook(item)"
           >
             Book ({{ item.left }} left)
@@ -69,10 +71,11 @@ const props = defineProps({
   filters: { type: Object, default: () => ({ q: "", from: "", to: "" }) },
 });
 const emit = defineEmits(["book", "refresh"]);
-
 function emitBook(item) {
+  if (item.isBooking) return;
+  item.isBooking = true;
   const qty = item.qty && item.qty > 0 ? item.qty : 1;
-  emit("book", { id: item.id, qty });
+  emit("book", { id: item.id, qty, item });
 }
 const headers = [
   { title: "Title", key: "title" },
@@ -140,12 +143,6 @@ onMounted(() => {
   loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
 });
 </script>
-
-
-
-
-
-
 
 <style scoped>
 .v-data-table {
