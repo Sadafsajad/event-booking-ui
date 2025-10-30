@@ -9,7 +9,7 @@
     item-value="id"
     @update:options="loadItems"
   >
-   <template v-slot:item.actions="{ item }">
+    <template v-slot:item.actions="{ item }">
       <!-- Already booked by user -->
       <v-chip
         v-if="item.mine_qty > 0"
@@ -31,8 +31,17 @@
       >
         Full
       </v-chip>
-
-      <!-- Book with qty input -->
+      <!-- Admin view: just show remaining seats -->
+      <v-chip
+        v-else-if="user?.is_admin"
+        color="grey"
+        size="small"
+        label
+        text-color="white"
+      >
+        {{ item.left }} seats left
+      </v-chip>
+      <!-- Non-admin: show booking option -->
       <div v-else class="d-flex flex-column align-start">
         <div class="d-flex align-center" style="gap: 6px; margin-top: 4px;">
           <v-text-field
@@ -67,83 +76,82 @@
 <script setup>
   import { ref, watch, onMounted } from "vue";
   import api from "@/plugins/axios";
-const props = defineProps({
-  filters: { type: Object, default: () => ({ q: "", from: "", to: "" }) },
-});
-const emit = defineEmits(["book", "refresh"]);
-function emitBook(item) {
-  if (item.isBooking) return;
-  item.isBooking = true;
-  const qty = item.qty && item.qty > 0 ? item.qty : 1;
-  emit("book", { id: item.id, qty, item });
-}
-const headers = [
-  { title: "Title", key: "title" },
-  { title: "Venue", key: "venue" },
-  { title: "Capacity", key: "capacity", align: "end" },
-  { title: "Date", key: "event_at", align: "end" },
-  { title: "Actions", key: "actions", sortable: false, align: "center" },
-];
-
-const serverItems = ref([]);
-const totalItems = ref(0);
-const loading = ref(false);
-const itemsPerPage = ref(10);
-const filters = ref({ ...props.filters });
-// ✅ Date Formatter Function
-function formatDate(dateStr) {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return d.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  const props = defineProps({
+    filters: { type: Object, default: () => ({ q: "", from: "", to: "" }) },
+    user: { type: Object, default: null },
   });
-}
-// 🚀 Load paginated items from Laravel API
-async function loadItems({ page, itemsPerPage, sortBy }) {
-  loading.value = true;
-  try {
-    const params = {
-      page,
-      per_page: itemsPerPage,
-      q: filters.value.q,
-      from: filters.value.from,
-      to: filters.value.to,
-      sort: sortBy?.[0]?.key ?? "event_at",
-      order: sortBy?.[0]?.order ?? "asc",
-    };
-
-    const res = await api.get("/events", { params });
-    const list = res.data.data || [];
-    console.log(res);
-    serverItems.value = res.data.data || [];
-    totalItems.value = res.data.total;
-  } catch (err) {
-    console.error("API Error:", err.response?.data || err.message);
-  } finally {
-    loading.value = false;
+  const emit = defineEmits(["book", "refresh"]);
+  function emitBook(item) {
+    if (item.isBooking) return;
+    item.isBooking = true;
+    const qty = item.qty && item.qty > 0 ? item.qty : 1;
+    emit("book", { id: item.id, qty, item });
   }
-}
-defineExpose({ loadItems });
+  const headers = [
+    { title: "Title", key: "title" },
+    { title: "Venue", key: "venue" },
+    { title: "Capacity", key: "capacity", align: "end" },
+    { title: "Date", key: "event_at", align: "end" },
+    { title: "Actions", key: "actions", sortable: false, align: "center" },
+  ];
+  const serverItems = ref([]);
+  const totalItems = ref(0);
+  const loading = ref(false);
+  const itemsPerPage = ref(10);
+  const filters = ref({ ...props.filters });
+  // ✅ Date Formatter Function
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return d.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  //  Load paginated items from Laravel API
+  async function loadItems({ page, itemsPerPage, sortBy }) {
+    loading.value = true;
+    try {
+      const params = {
+        page,
+        per_page: itemsPerPage,
+        q: filters.value.q,
+        from: filters.value.from,
+        to: filters.value.to,
+        sort: sortBy?.[0]?.key ?? "event_at",
+        order: sortBy?.[0]?.order ?? "asc",
+      };
 
-// Auto refresh when filters change
-watch(
-  () => props.filters,
-  (val) => {
-    filters.value = { ...val };
+      const res = await api.get("/events", { params });
+      const list = res.data.data || [];
+      console.log(res);
+      serverItems.value = res.data.data || [];
+      totalItems.value = res.data.total;
+    } catch (err) {
+      console.error("API Error:", err.response?.data || err.message);
+    } finally {
+      loading.value = false;
+    }
+  }
+  defineExpose({ loadItems });
+
+  // Auto refresh when filters change
+  watch(
+    () => props.filters,
+    (val) => {
+      filters.value = { ...val };
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
+    },
+    { deep: true }
+  );
+
+  onMounted(() => {
     loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
-  },
-  { deep: true }
-);
-
-onMounted(() => {
-  loadItems({ page: 1, itemsPerPage: itemsPerPage.value });
-});
+  });
 </script>
-
 <style scoped>
 .v-data-table {
   background: #fff;

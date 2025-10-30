@@ -1,10 +1,29 @@
 <script setup>
-import { RouterView, RouterLink } from 'vue-router'
+import { RouterView, RouterLink, useRouter } from 'vue-router'
+import api from '@/plugins/axios'
+
+const router = useRouter()
+
+async function logout() {
+  try {
+    // Call backend logout API (optional if token-based)
+    await api.post('/logout')
+
+    // Remove auth data from localStorage
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+
+    // Redirect to login
+    router.push({ name: 'login' })
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 </script>
 
 <template>
   <div class="app-container">
-    <!-- Top navigation (optional) -->
+    <!-- Navbar -->
     <header class="navbar">
       <div class="nav-left">
         <h1 class="brand">EventBook</h1>
@@ -12,11 +31,11 @@ import { RouterView, RouterLink } from 'vue-router'
 
       <nav class="nav-right">
         <RouterLink to="/" class="nav-link" active-class="active">Home</RouterLink>
-        <!-- <RouterLink to="/about" class="nav-link" active-class="active">About</RouterLink> -->
+        <button class="nav-link logout-btn" @click="logout">Logout</button>
       </nav>
     </header>
 
-    <!-- Page Content -->
+    <!-- Main Page -->
     <main class="page-content">
       <RouterView />
     </main>
@@ -52,12 +71,18 @@ import { RouterView, RouterLink } from 'vue-router'
 .nav-right {
   display: flex;
   gap: 18px;
+  align-items: center;
 }
 
 .nav-link {
   color: #d1d5db;
   text-decoration: none;
   font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
 }
 
 .nav-link:hover {
@@ -69,13 +94,8 @@ import { RouterView, RouterLink } from 'vue-router'
   border-bottom: 2px solid #4f46e5;
 }
 
-/* Main Content */
-.page-content {
-  flex: 1;
-  width: 100%;
-  min-height: calc(100vh - 60px);
-  padding: 24px 40px;
-  background: #f3f4f6;
-  overflow-y: auto;
+.logout-btn {
+  border-left: 1px solid #374151;
+  padding-left: 12px;
 }
 </style>

@@ -1,7 +1,6 @@
 <template>
   <div class="home-page">
-    <HeaderBar @open-create="showCreateModal = true" />
-
+    <HeaderBar v-if="user?.is_admin" @open-create="showCreateModal = true" />
     <div class="content">
       <FlashMessage v-if="flashMessage" :message="flashMessage" />
 
@@ -9,8 +8,8 @@
       <EventFilters v-model="filters"  />
 
       <!-- ✅ Vuetify Table -->
-      <EventTable :filters="filters" @book="bookEvent" />
-
+      <EventTable :filters="filters" :user="user" @book="bookEvent" />
+      
       <!-- Modal -->
       <CreateEventModal
         v-if="showCreateModal"
@@ -22,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import HeaderBar from "@/components/HeaderBar.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import EventFilters from "@/components/EventFilters.vue";
@@ -33,7 +32,16 @@ import api from "@/plugins/axios";
 const showCreateModal = ref(false);
 const flashMessage = ref("");
 const filters = ref({ q: "", from: "", to: "" });
+const user = ref(null);
 
+onMounted(() => {
+  const storedUser = localStorage.getItem('user');
+  console.log("Raw stored user:", storedUser);
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
+    console.log("Parsed user:", user.value);
+  }
+});
 
 function addEvent() {
   showCreateModal.value = false;
@@ -45,9 +53,8 @@ async function bookEvent({ id, qty, item }) {
   try {
     await api.post(`/bookings/${id}`, { qty });
     flashMessage.value = "Event booked successfully!";
-    item.isBooking = false; 
-    // Refresh the table without reloading the page
-    filters.value = { ...filters.value }; 
+    item.isBooking = false;
+    filters.value = { ...filters.value }; // refresh table
   } catch (err) {
     console.error(err.response?.data || err);
     flashMessage.value = err.response?.data?.message || "Booking failed!";
