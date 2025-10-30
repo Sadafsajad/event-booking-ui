@@ -9,21 +9,19 @@
     item-value="id"
     @update:options="loadItems"
   >
-   <template v-slot:item.actions="{ item }">
-      <!-- Already booked by user -->
-      <v-chip
-        v-if="item.mine_qty > 0"
-        color="blue"
+   <!-- Book / Full -->
+    <template v-slot:item.actions="{ item }">
+      <v-btn
+        v-if="item.left > 0"
+        color="green"
         size="small"
-        label
-        text-color="white"
+        variant="flat"
+        @click="$emit('book', item.id)"
       >
-        Booked ({{ item.mine_qty }})
-      </v-chip>
-
-      <!-- Full event -->
+        Book ({{ item.left }} left)
+      </v-btn>
       <v-chip
-        v-else-if="item.left <= 0"
+        v-else
         color="red"
         size="small"
         label
@@ -31,34 +29,6 @@
       >
         Full
       </v-chip>
-
-      <!-- Book with qty input -->
-      <div v-else class="d-flex flex-column align-start">
-        <div class="d-flex align-center" style="gap: 6px; margin-top: 4px;">
-          <v-text-field
-            v-model.number="item.qty"
-            type="number"
-            variant="outlined"
-            density="compact"
-            min="1"
-            :max="item.left"
-            hide-details
-            style="max-width: 70px;"
-          />
-          <v-btn
-            color="green"
-            size="small"
-            variant="flat"
-            class="text-white"
-            @click="emitBook(item)"
-          >
-            Book ({{ item.left }} left)
-          </v-btn>
-        </div>
-      </div>
-    </template>
-    <template v-slot:item.event_at="{ item }">
-      {{ formatDate(item.event_at) }}
     </template>
   </v-data-table-server>
 </template>
@@ -68,12 +38,8 @@
 const props = defineProps({
   filters: { type: Object, default: () => ({ q: "", from: "", to: "" }) },
 });
-const emit = defineEmits(["book", "refresh"]);
+defineEmits(["book"]);
 
-function emitBook(item) {
-  const qty = item.qty && item.qty > 0 ? item.qty : 1;
-  emit("book", { id: item.id, qty });
-}
 const headers = [
   { title: "Title", key: "title" },
   { title: "Venue", key: "venue" },
@@ -87,18 +53,6 @@ const totalItems = ref(0);
 const loading = ref(false);
 const itemsPerPage = ref(10);
 const filters = ref({ ...props.filters });
-// ✅ Date Formatter Function
-function formatDate(dateStr) {
-  if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  return d.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 // 🚀 Load paginated items from Laravel API
 async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
@@ -116,7 +70,10 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     const res = await api.get("/events", { params });
     const list = res.data.data || [];
     console.log(res);
-    serverItems.value = res.data.data || [];
+    serverItems.value = list.map((e) => ({
+      ...e,
+      left: e.capacity - (e.booked || 0),
+    }));
     totalItems.value = res.data.total;
   } catch (err) {
     console.error("API Error:", err.response?.data || err.message);
@@ -124,7 +81,6 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = false;
   }
 }
-defineExpose({ loadItems });
 
 // Auto refresh when filters change
 watch(

@@ -10,11 +10,16 @@ import router from './router'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import '@mdi/font/css/materialdesignicons.css'
+
 
 // Create Vuetify instance
 const vuetify = createVuetify({
   components,
   directives,
+    icons: {
+      defaultSet: 'mdi', // 👈 this is required
+    },
 })
 
 // Create Vue app

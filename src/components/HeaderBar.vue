@@ -6,8 +6,8 @@
            <v-btn
           class="text-none text-subtitle-1"
           color="#5865f2"
-          size="small"
-          variant="flat"
+          size="large"
+          variant="tonal"
           @click="$emit('open-create')"
         >
         + Create Event
