@@ -3,26 +3,29 @@
     <h2>Events</h2>
 
     <div class="actions">
-           <v-btn
-          class="text-none text-subtitle-1"
-          color="#5865f2"
-          size="large"
-          variant="tonal"
-          @click="$emit('open-create')"
-        >
-        + Create Event
-        </v-btn>
-      <!-- <button  class="btn create"></button> -->
+      <v-btn
+        class="header-btn"
+        variant="outlined"
+        color="primary"
+        @click="$emit('open-reports')"
+      >
+        <v-icon size="20" class="mr-2">mdi-chart-bar</v-icon>
+        Reports
+      </v-btn>
+
+      <v-btn
+        class="header-btn create-btn"
+        @click="$emit('open-create')"
+      >
+        <v-icon size="20" class="mr-2">mdi-plus</v-icon>
+        Create Event
+      </v-btn>
     </div>
   </header>
 </template>
 
 <script setup>
-/*
-No props here — purely emits.
-We'll emit an event to open the Create Event modal.
-*/
-defineEmits(["open-create"]);
+defineEmits(["open-create", "open-reports"]);
 </script>
 
 <style scoped>
@@ -30,11 +33,10 @@ defineEmits(["open-create"]);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
-  padding: 14px 18px;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
 }
 
 h2 {
@@ -43,19 +45,25 @@ h2 {
   color: #111827;
 }
 
-.actions .btn {
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-weight: 600;
-  cursor: pointer;
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.create {
-  background: #4f46e5;
-  color: #fff;
+.header-btn {
+  text-transform: none;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 8px 18px;
 }
-.create:hover {
+
+.create-btn {
+  background: #4f46e5;
+  color: white;
+}
+.create-btn:hover {
   background: #4338ca;
 }
 </style>

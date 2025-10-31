@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Auth/Login.vue'
 import Register from '../views/Auth/Register.vue'
+import Report from '../views/Reports.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,7 +24,14 @@ const router = createRouter({
       name: 'register',
       component: Register,
       meta: { guestOnly: true }
+    },
+    {
+      path: '/reports',
+      name: 'reports',
+      component: () => Report,
+      meta: { requiresAuth: true, adminOnly: true }
     }
+
   ]
 })
 

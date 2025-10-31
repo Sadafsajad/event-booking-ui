@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-    <HeaderBar v-if="user?.is_admin" @open-create="showCreateModal = true" />
+    <HeaderBar v-if="user?.is_admin" @open-create="showCreateModal = true" @open-reports="goReports" />
     <div class="content">
       <FlashMessage v-if="flashMessage" :message="flashMessage" />
 
@@ -28,6 +28,12 @@ import EventFilters from "@/components/EventFilters.vue";
 import EventTable from "@/components/EventTable.vue";
 import CreateEventModal from "@/components/CreateEventModal.vue";
 import api from "@/plugins/axios";
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+function goReports() {
+  router.push({ name: "reports" });
+}
 
 const showCreateModal = ref(false);
 const flashMessage = ref("");
