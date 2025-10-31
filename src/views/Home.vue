@@ -8,7 +8,7 @@
       <EventFilters v-model="filters"  />
 
       <!-- ✅ Vuetify Table -->
-      <EventTable :filters="filters" :user="user" @book="bookEvent" />
+      <EventTable :filters="filters" :user="user" @book="bookEvent" @refresh="load"/>
       
       <!-- Modal -->
       <CreateEventModal
@@ -52,7 +52,7 @@ onMounted(() => {
 function addEvent() {
   showCreateModal.value = false;
   flashMessage.value = "Event created successfully!";
-  setTimeout(() => (flashMessage.value = ""), 2000);
+  setTimeout(() => (flashMessage.value = "",location.reload()), 2000);
 }
 
 async function bookEvent({ id, qty, item }) {
