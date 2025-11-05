@@ -72,7 +72,9 @@
       <!-- Buttons -->
       <div class="flex justify-end gap-4 mt-6">
         <v-btn color="grey-lighten-2" @click="$emit('close')">Cancel</v-btn>
-        <v-btn color="indigo" variant="flat" type="submit" class="text-white">Create</v-btn>
+        <v-btn color="indigo" variant="flat" type="submit" class="text-white">
+          {{ props.eventId ? "Update" : "Create" }}
+        </v-btn>
       </div>
     </v-form>
   </ModalWrapper>
@@ -82,7 +84,11 @@
 import { ref, computed } from "vue";
 import ModalWrapper from "./ModalWrapper.vue";
 import api from "@/plugins/axios";
+import { onMounted } from "vue";
 
+const props = defineProps({
+  eventId: { type: Number, default: null }
+});
 const emit = defineEmits(["close", "event-created"]);
 
 const title = ref("");
@@ -91,6 +97,28 @@ const capacity = ref(10);
 const date = ref("");
 const description = ref("");
 const menu = ref(false);
+
+onMounted(() => {
+  if (props.eventId) {
+    fetchEventDetails();
+  }
+});
+async function fetchEventDetails() {
+  try {
+    const res = await api.get(`/admin/events/${props.eventId}/edit`);
+    const ev = res.data;
+
+    title.value = ev.title;
+    venue.value = ev.venue;
+    capacity.value = ev.capacity;
+    description.value = ev.description;
+
+    // Convert datetime -> yyyy-mm-dd for V-DatePicker
+    date.value = ev.event_at.split(" ")[0];
+  } catch (error) {
+    console.error("Fetch event error:", error.response?.data || error);
+  }
+}
 
 const minDate = computed(() => {
   const today = new Date();
@@ -123,8 +151,16 @@ async function createEvent() {
       description: description.value || null,
     };
 
-    const res = await api.post("/admin/events", payload);
-    emit("event-created", res.data);
+    let res;
+    if (props.eventId) {
+      //  UPDATE
+      res = await api.put(`/admin/events/${props.eventId}`, payload);
+      emit("event-updated", res.data.event);
+    } else {
+      // CREATE
+      res = await api.post("/admin/events", payload);
+      emit("event-created", res.data);
+    }
     emit("close");
   } catch (error) {
     console.error("Event create error:", error.response?.data || error);

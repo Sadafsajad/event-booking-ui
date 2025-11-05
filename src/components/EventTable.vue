@@ -213,7 +213,7 @@ async function confirmDelete(item) {
 }
 
 function editItem(item) {
-  console.log("Edit:", item.id);
+  emit("edit", item.id);
 }
 </script>
 

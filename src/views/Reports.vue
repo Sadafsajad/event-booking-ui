@@ -68,19 +68,18 @@ const powerUsers = ref([]);
 const occupancy = ref([]);
 
 onMounted(async () => {
-  const top5Events = await api.get("/reports/top5");
-  top5.value = top5Events.data.data;
+    const top5Events = await api.get("/reports?type=top5");
+    top5.value = top5Events.data.data;
 
-  const usersMoreThanThreeEvents = await api.get("/reports/power-users");
-  powerUsers.value = usersMoreThanThreeEvents.data.data;
+    const usersMoreThanThreeEvents = await api.get("/reports?type=power-users");
+    powerUsers.value = usersMoreThanThreeEvents.data.data;
 
-  const occupancyPerEvent = await api.get("/reports/occupancy");
-  occupancy.value = occupancyPerEvent.data.data;
+    const occupancyPerEvent = await api.get("/reports?type=occupancy");
+    occupancy.value = occupancyPerEvent.data.data;
 
-  loadTop5Chart();
-  loadOccupancyChart();
+    loadTop5Chart();
+    loadOccupancyChart();
 });
-
 
 function loadTop5Chart() {
   new Chart(document.getElementById("top5Chart"), {

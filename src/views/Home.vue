@@ -8,13 +8,20 @@
       <EventFilters v-model="filters"  />
 
       <!-- ✅ Vuetify Table -->
-      <EventTable :filters="filters" :user="user" @book="bookEvent" @refresh="load"/>
-      
+      <EventTable 
+        :filters="filters" 
+        :user="user" 
+        @book="bookEvent" 
+        @refresh="load"
+        @edit="openEditModal"
+      />
       <!-- Modal -->
       <CreateEventModal
         v-if="showCreateModal"
+        :event-id="editingEventId"
         @close="showCreateModal = false"
         @event-created="addEvent"
+        @event-updated="afterUpdate"
       />
     </div>
   </div>
@@ -36,6 +43,7 @@ function goReports() {
 }
 
 const showCreateModal = ref(false);
+const editingEventId = ref(null);
 const flashMessage = ref("");
 const filters = ref({ q: "", from: "", to: "" });
 const user = ref(null);
@@ -54,7 +62,10 @@ function addEvent() {
   flashMessage.value = "Event created successfully!";
   setTimeout(() => (flashMessage.value = "",location.reload()), 2000);
 }
-
+async function openEditModal(id) {
+  editingEventId.value = id;
+  showCreateModal.value = true;
+}
 async function bookEvent({ id, qty, item }) {
   try {
     await api.post(`/bookings/${id}`, { qty });
@@ -68,6 +79,11 @@ async function bookEvent({ id, qty, item }) {
   } finally {
     setTimeout(() => (flashMessage.value = ""), 2500);
   }
+}
+function afterUpdate() {
+  flashMessage.value = "Event updated successfully!";
+  showCreateModal.value = false;
+  setTimeout(() => location.reload(), 1200);
 }
 </script>
 
